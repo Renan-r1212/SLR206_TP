@@ -1,12 +1,12 @@
 mkdir updateResult
 
-for FILE in 1 2 3 4
+for FILE in 4
 do
     mkdir updateResult/update_compare_$FILE/ 
     for ALG in CoarseGrainedListBasedSet HandsOverHandsSet
     do
 	mkdir updateResult/update_compare_$FILE/$ALG
-	for LIST_SIZE in 10000 12000 15000 20000 
+	for LIST_SIZE in 1000 2000 5000 8000 
 	do
 	    mkdir updateResult/update_compare_$FILE/$ALG/$LIST_SIZE
 	    for UPDATE_RATIO in 10 100

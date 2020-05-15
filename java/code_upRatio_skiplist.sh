@@ -4,7 +4,7 @@ do
     for ALG in LazySkipList
     do
 	mkdir updateResult/update_compare_$FILE/$ALG
-	for LIST_SIZE in 10 100 1000 2000 5000 8000 
+	for LIST_SIZE in 100 1000 2000 5000 8000 
 	do
 	    mkdir updateResult/update_compare_$FILE/$ALG/$LIST_SIZE
 	    for UPDATE_RATIO in 10 100
