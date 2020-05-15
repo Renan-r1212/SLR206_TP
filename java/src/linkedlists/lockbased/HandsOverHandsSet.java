@@ -1,16 +1,14 @@
 package linkedlists.lockbased;
 
-import contention.abstractions.AbstractCompositionalIntSet;
-
 import java.util.concurrent.locks.Lock;
+import contention.abstractions.AbstractCompositionalIntSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Implementation of the fine grained lock based set.
- * To go through the linked list underlying the set, lock only two nodes at any moment.
+ * Implementation of the fine grained lock based set, where it goes
+ * through the linkedlist of the set locking only 2 nodes per access.
  */
 public class HandsOverHandsSet extends AbstractCompositionalIntSet {
-    // sentinel nodes
     private Node head;
     private Node tail;
 
@@ -22,9 +20,13 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
 
     /**
      * Add an element to the list.
-     * If the given element is already in the list, it is not added (no duplicates in a set)
-     * @param x the element to add
-     * @return a boolean indicating if the element were added
+     * Goes through the list and looking for the place where the element
+     * @param x will be inserted locking 2 nodes ad a time. If @param x 
+     * is already in the set, then it's not added. If the element was 
+     * added the method returns true, esle it returns false. Once the
+     * operation is done, the locks are realesed.
+     * @return a boolean indicating if the element were added.
+     * @param x the element to add.
      */
     @Override
     public boolean addInt(int x) {
@@ -34,25 +36,20 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
             Node curr = pred.next;
             curr.lock();
             try {
-                // go through the list and look for where to insert value
-                // lock only two nodes at a time
                 while(curr.key < x){
                     pred.unlock();
                     pred=curr;
                     curr=curr.next;
                     curr.lock();
                 }
-                // the element is already in the set
                 if(curr.key == x){
                     return false;
                 }
-                // insert the element
                 Node newNode = new Node(x);
                 pred.next = newNode;
                 newNode.next=curr;
                 return true;
             } finally {
-                // realease the locks
                 curr.unlock();
             }
         } finally {
@@ -61,9 +58,13 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
     }
 
     /**
-     * Remove the given element from the set
+     * Remove an element from the list.
+     * Goes through the list and looking for the element @param x to
+     * be removed locking 2 nodes ad a time.If the element was removed
+     * the method returns true, esle it returns false. Once the
+     * operation is done, the locks are realesed.
+     * @return a boolean indicating if the element where found and removed.
      * @param x The element to remove
-     * @return a boolean indicating if the element where found and removed
      */
     @Override
     public boolean removeInt(int x) {
@@ -73,23 +74,18 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
             Node curr = pred.next;
             curr.lock();
             try {
-                // go through the list and look for the value to be removed
-                // lock only two nodes at a time
                 while(curr.key < x){
                     pred.unlock();
                     pred=curr;
                     curr=curr.next;
                     curr.lock();
                 }
-                // the element is  not in the set
                 if(curr.key != x) {
                     return false;
                 }
-                // remove the element
                 pred.next = curr.next;
                 return true;
             } finally {
-                // release the locks
                 curr.unlock();
             }
         } finally {
@@ -98,9 +94,14 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
     }
 
     /**
-     * Check whether a element is in the set
-     * @param x the element to check the presence of
+     * Check whether a element is in the set.
+     * Goes through the list and looking for the place where the
+     * element @param x is located locking 2 nodes ad a time. Once
+     * it finds the place than it returns true if x is in the set,
+     * else it returns false. Once the operation is done, the locks
+     * are realesed.
      * @return a boolean indicating if the element is in the set
+     * @param x the element to check the presence of
      */
     @Override
     public boolean containsInt(int x) {
@@ -110,8 +111,6 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
             Node curr = pred.next;
             curr.lock();
             try {
-                // go through the list and look for the value
-                // lock only two nodes at a time
                 while(curr.key < x){
                     pred.unlock();
                     pred=curr;
@@ -120,7 +119,6 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
                 }
                 return curr.key == x;
             } finally {
-                // release locks
                 curr.unlock();
             }
         } finally {
@@ -128,9 +126,6 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
         }
     }
 
-    /**
-     * Non atomic and thread-unsafe
-     */
     @Override
     public int size() {
         int count = 0;
@@ -153,7 +148,6 @@ public class HandsOverHandsSet extends AbstractCompositionalIntSet {
         public int key;
         public Node next = null;
 
-        // each node can be locked individually
         private Lock lock = new ReentrantLock();
 
         Node(int item) {
